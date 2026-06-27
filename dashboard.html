@@ -185,8 +185,9 @@ const DAILY = {
   rhrAvg7: 56,
   prs: { km5: "26:00", km10: "1:03:48" },
   runHistory: [
-    { date: "2026-06-21", name: "Christchurch Running",         distM: 7056, durSec: 2631, avgHR: 146, ei: 1.10 },
-    { date: "2026-06-25", name: "Christchurch – Benchmark Run", distM: 1516, durSec: 542,  avgHR: 142, ei: 1.18 },
+    { date: "2026-06-14", name: "Christchurch – Pre-Race Workout", distM: 6923, durSec: 2407, avgHR: 162, ei: 1.07 },
+    { date: "2026-06-21", name: "Christchurch Running",             distM: 7056, durSec: 2631, avgHR: 146, ei: 1.10 },
+    { date: "2026-06-25", name: "Christchurch – Benchmark Run",     distM: 1516, durSec: 542,  avgHR: 142, ei: 1.18 },
   ],
   rhrHistory: [
     { date: "2026-06-21", rhr: 58 },
@@ -249,10 +250,22 @@ const DAILY = {
       comment: "Solid threshold run — pace locked 5:33–5:58/km while HR drifted only 8bpm (152→160); 73% Z4, strong aerobic efficiency."
     },
     {
-      name: "Cardio", type: "cardio", date: "2026-06-20",
+      name: "Cardio", type: "karate", date: "2026-06-20",
       durSec: 22619, distM: 0, avgHR: 106, maxHR: 163, calories: 1897,
       aerobicTE: 2.6, anaerobicTE: 1.5,
       comment: "Extended 6.3hr session (likely seminar) — predominantly aerobic (34% Z1); RHR recovered to normal within 48 hours."
+    },
+    {
+      name: "Cardio", type: "karate", date: "2026-06-16",
+      durSec: 9156, distM: 0, avgHR: 108, maxHR: 172, calories: 577,
+      aerobicTE: 1.6, anaerobicTE: 2.1,
+      comment: "2.5hr moderate session — low avg HR (108bpm) with 172bpm spikes; anaerobic TE 2.1 suggests intermittent karate-style bursts within an otherwise easy load."
+    },
+    {
+      name: "Christchurch – Pre-Race Workout", type: "run", date: "2026-06-14",
+      durSec: 2407, distM: 6923, avgHR: 162, maxHR: 183, calories: 580,
+      aerobicTE: 4.8, anaerobicTE: 0.0,
+      comment: "Race-intensity effort — 5:47/km @ 162bpm avg, 183bpm peak; aerobic TE 4.8 (Highly Improving) signals a near-maximal stimulus. Strongest aerobic session in the window."
     },
   ]
 };
@@ -728,6 +741,37 @@ function renderFitness() {
 // Heatmap — linear 0→21 day colour scale (black → red)
 // Designed for red/green colour blindness
 // ════════════════════════════════════════════════════════════
+
+// Latest confidence score for a skill key across all log entries
+// Kata key:          g.id           e.g. "gekisai1"
+// Bunkai group key:  g.id+"_bunkai" e.g. "gekisai1_bunkai"
+// Renzoku key:       g.id+"_r"      e.g. "gekisai1_r"
+// Other skill key:   skill.id       e.g. "sanchin"
+function latestConfidence(skillId) {
+  let score = null, bestDate = null;
+  KARATE_LOG.forEach(e => {
+    if (e.confidence && e.confidence[skillId] != null) {
+      if (!bestDate || e.date > bestDate) {
+        score = e.confidence[skillId];
+        bestDate = e.date;
+      }
+    }
+  });
+  return score; // null = never rated
+}
+
+// Render confidence badge; darkBg=true when placed on a dark coloured cell
+function confBadge(score, darkBg) {
+  if (score === null) {
+    return `<span style="font-size:9px;opacity:0.45;color:${darkBg ? '#fff' : '#8e8e93'}">—</span>`;
+  }
+  // Colorblind-safe: blue=strong, amber=ok, red=needs work
+  const col = score >= 4 ? (darkBg ? '#93c5fd' : '#007aff')
+            : score === 3 ? (darkBg ? '#fde68a' : '#d97706')
+            :               (darkBg ? '#fca5a5' : '#ff3b30');
+  return `<span style="font-size:10px;font-weight:800;color:${col}">${score}/5</span>`;
+}
+
 function cellStyle(daysSince) {
   if (daysSince === null) return { bg: '#e5e5ea', fg: '#8e8e93' };
   const t = Math.min(daysSince / 21, 1);
@@ -764,16 +808,36 @@ function renderHeatmap(asOfYMD) {
     const section = document.createElement('div');
     section.className = 'kata-section';
 
+    // ── Kata main row ──────────────────────────────────────
     const last = lastTrained(g.id, log, asOfYMD);
     const days = last !== null ? daysBetween(last, asOfYMD) : null;
     const { bg, fg } = cellStyle(days);
+    const kataConf = latestConfidence(g.id);
     const mainCell = document.createElement('div');
     mainCell.className = 'kata-main';
     mainCell.style.background = bg; mainCell.style.color = fg;
-    mainCell.innerHTML = `<span class="kata-name">${g.name}</span><span class="kata-age">${ageLabel(days)}</span>`;
+    mainCell.innerHTML = `
+      <span class="kata-name">${g.name}</span>
+      <span style="display:flex;align-items:center;gap:8px">
+        ${confBadge(kataConf, true)}
+        <span class="kata-age">${ageLabel(days)}</span>
+      </span>`;
     section.appendChild(mainCell);
 
+    // ── Bunkai group ───────────────────────────────────────
     if (g.bunkai > 0) {
+      const bunkaiGroupId = `${g.id}_bunkai`;
+      const bGroupConf = latestConfidence(bunkaiGroupId);
+
+      // Group header row (confidence lives here)
+      const groupHeader = document.createElement('div');
+      groupHeader.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:3px 14px 1px;margin-top:3px';
+      groupHeader.innerHTML = `
+        <span style="font-size:10px;font-weight:600;color:#8e8e93">Kihon Bunkai</span>
+        ${confBadge(bGroupConf, false)}`;
+      section.appendChild(groupHeader);
+
+      // Individual chips — recency only
       const row = document.createElement('div');
       row.className = 'bunkai-row';
       for (let n = 1; n <= g.bunkai; n++) {
@@ -790,15 +854,22 @@ function renderHeatmap(asOfYMD) {
       section.appendChild(row);
     }
 
+    // ── Renzoku ────────────────────────────────────────────
     if (g.renzoku) {
       const rid = renzokuId(g.id);
       const rl = lastTrained(rid, log, asOfYMD);
       const rd = rl !== null ? daysBetween(rl, asOfYMD) : null;
       const { bg: rbg, fg: rfg } = cellStyle(rd);
+      const rConf = latestConfidence(rid);
       const strip = document.createElement('div');
       strip.className = 'renzoku-strip';
       strip.style.background = rbg; strip.style.color = rfg;
-      strip.innerHTML = `<span class="renzoku-label">Renzoku</span><span class="renzoku-age">${ageLabel(rd)}</span>`;
+      strip.innerHTML = `
+        <span class="renzoku-label">Renzoku</span>
+        <span style="display:flex;align-items:center;gap:8px">
+          ${confBadge(rConf, true)}
+          <span class="renzoku-age">${ageLabel(rd)}</span>
+        </span>`;
       section.appendChild(strip);
     }
 
@@ -812,16 +883,21 @@ function renderHeatmap(asOfYMD) {
   const divider = document.createElement('div'); divider.className = 'hm-divider';
   container.appendChild(divider);
 
+  // ── Other skills ───────────────────────────────────────
   const othersGrid = document.createElement('div');
   othersGrid.className = 'others-grid';
   OTHER_SKILLS.forEach(skill => {
     const sl = lastTrained(skill.id, log, asOfYMD);
     const sd = sl !== null ? daysBetween(sl, asOfYMD) : null;
     const { bg, fg } = cellStyle(sd);
+    const sConf = latestConfidence(skill.id);
     const cell = document.createElement('div');
     cell.className = 'other-cell';
     cell.style.background = bg; cell.style.color = fg;
-    cell.innerHTML = `<div class="other-name">${skill.name}</div><div class="other-age">${ageLabel(sd)}</div>`;
+    cell.innerHTML = `
+      <div class="other-name">${skill.name}</div>
+      <div style="margin:3px 0">${confBadge(sConf, true)}</div>
+      <div class="other-age">${ageLabel(sd)}</div>`;
     othersGrid.appendChild(cell);
   });
   container.appendChild(othersGrid);
