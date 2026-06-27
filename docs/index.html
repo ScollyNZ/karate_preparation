@@ -401,11 +401,16 @@ function renderSparkline(hist, valKey, colorFn, labelFn) {
 function rhrColor(v) { return v <= 55 ? '#34c759' : v <= 59 ? '#e6b800' : '#ff3b30'; }
 
 function rhrLabels(minV, maxV, W, H) {
-  return [[60,'#ff3b30'],[56,'#e6b800'],[52,'#34c759']].map(([v,c]) => {
+  const refY = H - ((60 - minV) / (maxV - minV)) * H;
+  const redline = (refY >= 0 && refY <= H)
+    ? `<line x1="0" y1="${refY.toFixed(1)}" x2="${W}" y2="${refY.toFixed(1)}" stroke="#ff3b30" stroke-width="1" stroke-dasharray="3,3" opacity="0.6"/>`
+    : '';
+  const labels = [[60,'#ff3b30'],[56,'#e6b800'],[52,'#34c759']].map(([v,c]) => {
     const y = H - ((v - minV) / (maxV - minV)) * H;
     if (y < 0 || y > H) return '';
     return `<text x="${W+4}" y="${y+4}" font-size="8" fill="${c}" font-family="system-ui">${v}</text>`;
   }).join('');
+  return redline + labels;
 }
 
 function renderRecovery() {
