@@ -143,6 +143,11 @@
   </div>
 
   <div class="card">
+    <div class="card-title">Body Weight</div>
+    <div id="weight-panel"></div>
+  </div>
+
+  <div class="card">
     <div class="card-title">Recent Training (14 days)</div>
     <div id="activities-panel"></div>
   </div>
@@ -267,6 +272,14 @@ const DAILY = {
       aerobicTE: 4.8, anaerobicTE: 0.0,
       comment: "Race-intensity effort — 5:47/km @ 162bpm avg, 183bpm peak; aerobic TE 4.8 (Highly Improving) signals a near-maximal stimulus. Strongest aerobic session in the window."
     },
+  ],
+  weightHistory: [
+    { date: "2026-06-07", kg: 84.4 },
+    { date: "2026-06-08", kg: 84.0 },
+    { date: "2026-06-10", kg: 84.6 },
+    { date: "2026-06-11", kg: 85.2 },
+    { date: "2026-06-14", kg: 84.7 },
+    { date: "2026-06-19", kg: 84.5 },
   ]
 };
 
@@ -411,6 +424,58 @@ function renderRecovery() {
       <div class="sparkline-wrap">
         <div class="sparkline-label">RHR · Last ${DAILY.rhrHistory.length} days</div>
         ${renderSparkline(DAILY.rhrHistory, 'rhr', rhrColor, rhrLabels)}
+      </div>
+    </div>
+  `;
+}
+
+// ════════════════════════════════════════════════════════════
+// Body Weight panel
+// ════════════════════════════════════════════════════════════
+function renderBodyWeight() {
+  const hist = (DAILY.weightHistory || []).slice().sort((a,b) => a.date.localeCompare(b.date));
+  const el = document.getElementById('weight-panel');
+  if (!hist.length) {
+    el.innerHTML = '<div style="color:#c7c7cc;font-size:11px;text-align:center;padding:14px">No data</div>';
+    return;
+  }
+  const latest = hist[hist.length - 1];
+  const first  = hist[0];
+  const change = +(latest.kg - first.kg).toFixed(1);
+  const changeStr = (change >= 0 ? '+' : '') + change + ' kg';
+  const changeCol = change < 0 ? '#007aff' : change > 0 ? '#ff3b30' : '#8e8e93';
+
+  // Sparkline
+  const vals = hist.map(d => d.kg);
+  const minV = Math.min(...vals) - 0.5;
+  const maxV = Math.max(...vals) + 0.5;
+  const W = 220, H = 44, n = vals.length;
+  const pts = vals.map((v,i) => {
+    const x = n > 1 ? (i / (n-1)) * W : W/2;
+    const y = H - ((v - minV) / (maxV - minV)) * H;
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  }).join(' ');
+  const sparkSvg = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" style="display:block;overflow:visible">
+    <polyline points="${pts}" fill="none" stroke="#007aff" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+    ${vals.map((v,i) => {
+      const x = n > 1 ? (i / (n-1)) * W : W/2;
+      const y = H - ((v - minV) / (maxV - minV)) * H;
+      return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3" fill="#007aff"/>`;
+    }).join('')}
+  </svg>`;
+
+  el.innerHTML = `
+    <div style="font-size:10px;color:#c7c7cc;text-align:right;margin-bottom:8px">last logged ${latest.date}</div>
+    <div style="display:flex;align-items:flex-start;gap:16px">
+      <div style="flex-shrink:0">
+        <div style="font-size:28px;font-weight:800;line-height:1">${latest.kg.toFixed(1)}</div>
+        <div style="font-size:11px;color:#8e8e93;margin-top:2px">kg</div>
+        <div style="font-size:12px;font-weight:600;color:${changeCol};margin-top:6px">${changeStr}</div>
+        <div style="font-size:10px;color:#8e8e93">since ${first.date}</div>
+      </div>
+      <div>
+        <div style="font-size:10px;color:#8e8e93;margin-bottom:4px">Weight · ${hist.length} readings</div>
+        ${sparkSvg}
       </div>
     </div>
   `;
@@ -940,6 +1005,7 @@ function setupSlider() {
 // ════════════════════════════════════════════════════════════
 renderRecovery();
 renderTrainingStatus();
+renderBodyWeight();
 renderActivities();
 renderRunning();
 renderFitness();
