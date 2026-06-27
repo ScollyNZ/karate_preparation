@@ -924,7 +924,8 @@ function setupSlider() {
 
   function refresh() {
     const offset = parseInt(slider.value);
-    const d = new Date(minYMD); d.setDate(d.getDate() + offset);
+    const [sy,sm,sd] = minYMD.split('-').map(Number);
+    const d = new Date(sy, sm-1, sd); d.setDate(d.getDate() + offset);
     const ymd = toYMD(d);
     const isToday = ymd >= toYMD(todayDate);
     label.textContent = isToday ? 'Today' : ymd;
