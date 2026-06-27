@@ -1,0 +1,21 @@
+{
+  "activityId": 23312077517,
+  "name": "Cardio",
+  "type": "cardio",
+  "date": "2026-06-20",
+  "durSec": 22619,
+  "distM": 0,
+  "avgHR": 106,
+  "maxHR": 163,
+  "calories": 1897,
+  "hrZones": [
+    { "zone": 1, "label": "<94bpm",    "seconds": 7739, "pct": 34 },
+    { "zone": 2, "label": "94–112bpm", "seconds": 3689, "pct": 16 },
+    { "zone": 3, "label": "112–131bpm","seconds": 2265, "pct": 10 },
+    { "zone": 4, "label": "131–150bpm","seconds": 671,  "pct": 3  },
+    { "zone": 5, "label": ">150bpm",   "seconds": 0,    "pct": 0  }
+  ],
+  "comment": "Extended low-intensity session (6.3hrs) consistent with a karate seminar or long training day — high calorie burn reflects duration rather than intensity. 34% Z1 and predominantly sub-Z3 HR confirms mostly aerobic work with occasional bursts to 163bpm. Good recovery capacity demonstrated: RHR the following morning (58bpm) was only mildly elevated, returning to baseline within 48 hours.",
+  "generatedAt": "2026-06-27",
+  "generatedBy": "claude-sonnet-4-6"
+}

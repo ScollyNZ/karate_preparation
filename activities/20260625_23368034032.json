@@ -1,0 +1,26 @@
+{
+  "activityId": 23368034032,
+  "name": "Christchurch – Benchmark Run",
+  "type": "run",
+  "date": "2026-06-25",
+  "durSec": 542,
+  "distM": 1516,
+  "avgHR": 142,
+  "maxHR": 154,
+  "calories": 113,
+  "hrZones": [
+    { "zone": 1, "label": "<94bpm",    "seconds": 17,  "pct": 3  },
+    { "zone": 2, "label": "94–112bpm", "seconds": 58,  "pct": 11 },
+    { "zone": 3, "label": "112–131bpm","seconds": 337, "pct": 62 },
+    { "zone": 4, "label": "131–150bpm","seconds": 132, "pct": 24 },
+    { "zone": 5, "label": ">150bpm",   "seconds": 0,   "pct": 0  }
+  ],
+  "laps": [
+    { "lap": 1, "label": "Warmup",  "distM": 342,  "durSec": 120, "paceMinKm": 5.85, "avgHR": 132, "maxHR": 141 },
+    { "lap": 2, "label": "5min ON", "distM": 994,  "durSec": 299, "paceMinKm": 5.01, "avgHR": 148, "maxHR": 154 },
+    { "lap": 3, "label": "Cooldown","distM": 177,  "durSec": 109, "paceMinKm": 10.25,"avgHR": 135, "maxHR": 143 }
+  ],
+  "comment": "Structured benchmark — 5-minute effort at 5:01/km @ 148bpm average, confirming sub-25min 5km aerobic capacity. 62% Z3 indicates a controlled tempo rather than all-out effort; HR stayed well below max (154 vs 175+ in karate), leaving plenty of headroom. Run monthly to track aerobic efficiency gains in the lead-up to grading.",
+  "generatedAt": "2026-06-27",
+  "generatedBy": "claude-sonnet-4-6"
+}

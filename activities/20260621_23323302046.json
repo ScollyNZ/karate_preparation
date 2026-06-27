@@ -1,0 +1,31 @@
+{
+  "activityId": 23323302046,
+  "name": "Christchurch Running",
+  "type": "run",
+  "date": "2026-06-21",
+  "durSec": 2631,
+  "distM": 7056,
+  "avgHR": 146,
+  "maxHR": 171,
+  "calories": 544,
+  "hrZones": [
+    { "zone": 1, "label": "<94bpm",    "seconds": 27,   "pct": 1  },
+    { "zone": 2, "label": "94–112bpm", "seconds": 295,  "pct": 11 },
+    { "zone": 3, "label": "112–131bpm","seconds": 234,  "pct": 9  },
+    { "zone": 4, "label": "131–150bpm","seconds": 1838, "pct": 73 },
+    { "zone": 5, "label": ">150bpm",   "seconds": 52,   "pct": 2  }
+  ],
+  "laps": [
+    { "lap": 1, "distM": 1000, "durSec": 429, "paceMinKm": 7.14, "avgHR": 115, "maxHR": 151 },
+    { "lap": 2, "distM": 1000, "durSec": 334, "paceMinKm": 5.57, "avgHR": 152, "maxHR": 165 },
+    { "lap": 3, "distM": 1000, "durSec": 334, "paceMinKm": 5.57, "avgHR": 156, "maxHR": 163 },
+    { "lap": 4, "distM": 1000, "durSec": 334, "paceMinKm": 5.57, "avgHR": 158, "maxHR": 165 },
+    { "lap": 5, "distM": 1000, "durSec": 333, "paceMinKm": 5.55, "avgHR": 158, "maxHR": 164 },
+    { "lap": 6, "distM": 1000, "durSec": 335, "paceMinKm": 5.58, "avgHR": 160, "maxHR": 166 },
+    { "lap": 7, "distM": 1000, "durSec": 342, "paceMinKm": 5.70, "avgHR": 165, "maxHR": 171 },
+    { "lap": 8, "distM":  422, "durSec": 190, "paceMinKm": 11.03,"avgHR": 126, "maxHR": 149 }
+  ],
+  "comment": "Solid threshold session — pace held 5:33–5:58/km for 5 working km while HR drifted only 8bpm (152→160), indicating strong aerobic efficiency with minimal cardiac drift. 73% of run time in Z4 with a clear warmup lap and deliberate cooldown. Lap 7 pushed to 165bpm before backing off, marking the natural approach to lactate threshold without crossing it.",
+  "generatedAt": "2026-06-27",
+  "generatedBy": "claude-sonnet-4-6"
+}

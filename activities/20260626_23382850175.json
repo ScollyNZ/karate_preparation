@@ -1,0 +1,21 @@
+{
+  "activityId": 23382850175,
+  "name": "Karate",
+  "type": "karate",
+  "date": "2026-06-26",
+  "durSec": 6858,
+  "distM": 0,
+  "avgHR": 123,
+  "maxHR": 173,
+  "calories": 908,
+  "hrZones": [
+    { "zone": 1, "label": "<94bpm",    "seconds": 1844, "pct": 27 },
+    { "zone": 2, "label": "94–112bpm", "seconds": 1124, "pct": 16 },
+    { "zone": 3, "label": "112–131bpm","seconds": 1547, "pct": 23 },
+    { "zone": 4, "label": "131–150bpm","seconds": 1336, "pct": 20 },
+    { "zone": 5, "label": ">150bpm",   "seconds": 69,   "pct": 1  }
+  ],
+  "comment": "Hard, varied session — 908kcal across 1h54m signals genuine training load. Classic karate HR profile: 27% Z1 recovery between bursts, 43% Z3-4 intensity. Max 173bpm and 20% Z4 time suggests sparring rounds or dynamic kata sequences. Well-distributed load — elevated but within manageable range given RHR the next morning remained normal.",
+  "generatedAt": "2026-06-27",
+  "generatedBy": "claude-sonnet-4-6"
+}

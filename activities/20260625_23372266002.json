@@ -1,0 +1,21 @@
+{
+  "activityId": 23372266002,
+  "name": "Karate",
+  "type": "karate",
+  "date": "2026-06-25",
+  "durSec": 6142,
+  "distM": 0,
+  "avgHR": 119,
+  "maxHR": 175,
+  "calories": 691,
+  "hrZones": [
+    { "zone": 1, "label": "<94bpm",    "seconds": 2089, "pct": 34 },
+    { "zone": 2, "label": "94–112bpm", "seconds": 1624, "pct": 26 },
+    { "zone": 3, "label": "112–131bpm","seconds": 1320, "pct": 21 },
+    { "zone": 4, "label": "131–150bpm","seconds": 487,  "pct": 8  },
+    { "zone": 5, "label": ">150bpm",   "seconds": 51,   "pct": 1  }
+  ],
+  "comment": "Technical, moderate-load session — 60% of time in Z1-2 indicates substantial kata or bunkai work with rest and instruction periods. A single 175bpm spike confirms at least one explosive burst, but overall load was light (691kcal vs 908 the following day). Good session type for technical consolidation; the low Z4 time (8%) means recovery cost will be minimal going into the next day.",
+  "generatedAt": "2026-06-27",
+  "generatedBy": "claude-sonnet-4-6"
+}
