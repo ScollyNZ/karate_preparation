@@ -25,14 +25,18 @@ Both task SKILL.md files are in `scheduled_tasks/` in this repo.
 
 Recreate by telling Claude: *"Create a scheduled task at 7am daily using the instructions in scheduled_tasks/blackbelt-daily-refresh.md"*
 
+## GitHub Pages
+Dashboard is live at: https://scollyNZ.github.io/karate_preparation  
+Source: `docs/index.html` (main branch, /docs folder — set in repo Settings → Pages)
+
 ## Cowork artifact
-The dashboard artifact (blackbelt-dashboard) must be recreated from `dashboard.html`:  
-Tell Claude: *"Create a new artifact called blackbelt-dashboard from the file dashboard.html in the karate_preparation project folder"*
+The dashboard artifact (blackbelt-dashboard) must be recreated from `docs/index.html`:  
+Tell Claude: *"Create a new artifact called blackbelt-dashboard from the file docs/index.html in the karate_preparation project folder"*
 
 ## Key files
 | File | Purpose |
 |------|---------|
-| `dashboard.html` | Source of truth for the dashboard artifact |
+| `docs/index.html` | Source of truth for the dashboard artifact + GitHub Pages |
 | `log.json` | Training/nutrition log (Claude appends entries) |
 | `Karate Black Belt Preparation/fitness_log.md` | Manual Garmin snapshots and test results |
 | `activities/*.json` | Per-activity HR/splits/commentary |
