@@ -104,6 +104,16 @@
     .hm-leg-label { font-size: 10px; color: #8e8e93; white-space: nowrap; }
 
     .log-hint { margin-top: 14px; text-align: center; font-size: 11px; color: #c7c7cc; }
+
+    /* Fitness Tests */
+    .ft-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .ft-card { background: #f9f9fb; border-radius: 12px; padding: 11px 12px; }
+    .ft-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: #8e8e93; margin-bottom: 4px; }
+    .ft-value { font-size: 26px; font-weight: 800; line-height: 1; }
+    .ft-unit  { font-size: 11px; color: #8e8e93; margin-left: 2px; }
+    .ft-trend { font-size: 11px; font-weight: 600; margin-top: 2px; }
+    .ft-date  { font-size: 9px; color: #c7c7cc; margin-top: 2px; }
+    .ft-spark { margin-top: 6px; }
   </style>
 </head>
 <body>
@@ -143,6 +153,11 @@
   </div>
 
   <div class="card">
+    <div class="card-title">Karate Fitness Indicators</div>
+    <div id="fitness-panel"></div>
+  </div>
+
+  <div class="card">
     <div class="card-title">Karate Technical Readiness</div>
     <div class="heatmap-controls">
       <label>Date:</label>
@@ -169,6 +184,10 @@ const DAILY = {
   rhr: 57,
   rhrAvg7: 56,
   prs: { km5: "26:00", km10: "1:03:48" },
+  runHistory: [
+    { date: "2026-06-21", name: "Christchurch Running",         distM: 7056, durSec: 2631, avgHR: 146, ei: 1.10 },
+    { date: "2026-06-25", name: "Christchurch – Benchmark Run", distM: 1516, durSec: 542,  avgHR: 142, ei: 1.18 },
+  ],
   rhrHistory: [
     { date: "2026-06-21", rhr: 58 },
     { date: "2026-06-22", rhr: 56 },
@@ -179,6 +198,10 @@ const DAILY = {
     { date: "2026-06-27", rhr: 57 },
   ],
   trainingStatus: {
+    status: "Maintaining",
+    statusDate: "2026-06-25",
+    load7day: 322,
+    loadBand: "Optimal",
     vo2max: 46,
     vo2maxCategory: "Excellent",
     vo2maxChange6w: 3,
@@ -204,26 +227,31 @@ const DAILY = {
     {
       name: "Karate", type: "karate", date: "2026-06-26",
       durSec: 6858, distM: 0, avgHR: 123, maxHR: 173, calories: 908,
+      aerobicTE: 3.1, anaerobicTE: 2.0,
       comment: "Hard, varied session — 43% Z3-4 intensity with 27% Z1 recovery; max 173bpm and 20% Z4 time suggest sparring rounds."
     },
     {
       name: "Karate", type: "karate", date: "2026-06-25",
       durSec: 6142, distM: 0, avgHR: 119, maxHR: 175, calories: 691,
+      aerobicTE: 2.8, anaerobicTE: 1.7,
       comment: "Technical, moderate load — 60% Z1-2 indicates kata/bunkai work with instruction time; single 175bpm burst, low recovery cost."
     },
     {
       name: "Christchurch – Benchmark Run", type: "run", date: "2026-06-25",
       durSec: 542, distM: 1516, avgHR: 142, maxHR: 154, calories: 113,
+      aerobicTE: 2.1, anaerobicTE: 0.0,
       comment: "Structured benchmark — 5min effort at 5:01/km @ 148bpm avg; controlled tempo (62% Z3), well below max HR."
     },
     {
       name: "Christchurch Running", type: "run", date: "2026-06-21",
       durSec: 2631, distM: 7056, avgHR: 146, maxHR: 171, calories: 544,
+      aerobicTE: 3.7, anaerobicTE: 0.0,
       comment: "Solid threshold run — pace locked 5:33–5:58/km while HR drifted only 8bpm (152→160); 73% Z4, strong aerobic efficiency."
     },
     {
       name: "Cardio", type: "cardio", date: "2026-06-20",
       durSec: 22619, distM: 0, avgHR: 106, maxHR: 163, calories: 1897,
+      aerobicTE: 2.6, anaerobicTE: 1.5,
       comment: "Extended 6.3hr session (likely seminar) — predominantly aerobic (34% Z1); RHR recovered to normal within 48 hours."
     },
   ]
@@ -233,6 +261,15 @@ const DAILY = {
 // KARATE LOG — updated by Claude on each logged session
 // ════════════════════════════════════════════════════════════
 const KARATE_LOG = [
+  { date: "2026-06-27", skills: ["gekisai1"], notes: "1st Kata + bunkai (specific bunkai numbers not recorded)" },
+];
+
+// ════════════════════════════════════════════════════════════
+// FITNESS LOG — updated by Claude when test results reported
+// Fields: date, pushups, snapJumps (60s max), plankSec, wallSitSec
+// ════════════════════════════════════════════════════════════
+const FITNESS_LOG = [
+  { date: "2026-06-27", pushups: 10 },
 ];
 
 // ════════════════════════════════════════════════════════════
@@ -361,6 +398,14 @@ function renderRecovery() {
 // ════════════════════════════════════════════════════════════
 // Training Status panel
 // ════════════════════════════════════════════════════════════
+function teLabel(te) {
+  if (te < 2.0) return 'Recovery';
+  if (te < 3.0) return 'Maintaining';
+  if (te < 4.0) return 'Improving';
+  if (te < 4.5) return 'Highly Improving';
+  return 'Overreaching';
+}
+
 function renderTrainingStatus() {
   const ts = DAILY.trainingStatus;
   if (!ts) {
@@ -373,38 +418,77 @@ function renderTrainingStatus() {
   const changeColor = ts.vo2maxChange6w >= 0 ? '#34c759' : '#ff3b30';
   const vo2Color = () => '#007aff';
 
-  // Weekly load bar chart
-  let loadChart = '';
-  if (ts.weeklyLoad && ts.weeklyLoad.length) {
-    const maxTotal = Math.max(...ts.weeklyLoad.map(w => w.total));
-    const bars = ts.weeklyLoad.map(w => {
-      const pctMod = (w.moderate / maxTotal) * 100;
-      const pctVig = (w.vigorous / maxTotal) * 100;
-      const label = w.weekStart.slice(5); // MM-DD
-      const opacity = w.partial ? '0.55' : '1';
-      const tag = w.partial ? ' <span style="font-size:8px;color:#c7c7cc">partial</span>' : '';
+  // 7-day training load from activity training effect scores
+  const cutoff = new Date(todayDate); cutoff.setDate(cutoff.getDate() - 7);
+  const cutoffYMD = toYMD(cutoff);
+  const recent = DAILY.activities.filter(a => a.date >= cutoffYMD && a.aerobicTE != null);
+  let loadSection = '';
+  if (recent.length) {
+    const totalAerobic  = recent.reduce((s, a) => s + (a.aerobicTE  || 0), 0);
+    const totalAnaerobic= recent.reduce((s, a) => s + (a.anaerobicTE|| 0), 0);
+    const avgAerobic    = totalAerobic / recent.length;
+    const overallLabel  = teLabel(avgAerobic);
+    const overallColor  = avgAerobic >= 3 ? '#34c759' : avgAerobic >= 2 ? '#e6b800' : '#8e8e93';
+
+    // per-activity TE bars
+    const actBars = recent.map(a => {
+      const icon = a.type === 'karate' ? '🥋' : a.type === 'run' ? '🏃' : '💪';
+      const aePct = (a.aerobicTE / 5) * 100;
+      const anPct = (a.anaerobicTE / 5) * 100;
       return `
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
-          <div style="font-size:9px;color:#8e8e93;width:26px;flex-shrink:0">${label}</div>
-          <div style="flex:1;display:flex;height:10px;border-radius:5px;overflow:hidden;background:#f2f2f7;opacity:${opacity}">
-            <div style="width:${pctMod}%;background:#007aff"></div>
-            <div style="width:${pctVig}%;background:#5856d6"></div>
+        <div style="display:flex;align-items:center;gap:5px;margin-bottom:3px">
+          <div style="width:14px;font-size:11px;flex-shrink:0">${icon}</div>
+          <div style="font-size:9px;color:#8e8e93;width:28px;flex-shrink:0">${a.date.slice(5)}</div>
+          <div style="flex:1;position:relative;height:10px;border-radius:5px;background:#f2f2f7;overflow:hidden">
+            <div style="position:absolute;left:0;top:0;height:100%;width:${aePct}%;background:#007aff;border-radius:5px"></div>
+            <div style="position:absolute;left:${aePct}%;top:0;height:100%;width:${Math.min(anPct, 100-aePct)}%;background:#5856d6;border-radius:0 5px 5px 0"></div>
           </div>
-          <div style="font-size:9px;color:#8e8e93;width:28px;text-align:right;flex-shrink:0">${w.total}${tag}</div>
+          <div style="font-size:9px;color:#8e8e93;width:22px;text-align:right;flex-shrink:0">${a.aerobicTE.toFixed(1)}</div>
         </div>`;
     }).join('');
-    loadChart = `
-      <div style="margin-top:10px">
-        <div class="ts-sparkline-label">7-day training load <span style="color:#c7c7cc;font-weight:400;text-transform:none;letter-spacing:0">(intensity min)</span></div>
-        <div style="margin-top:6px">${bars}</div>
-        <div style="display:flex;gap:10px;margin-top:4px">
-          <div style="display:flex;align-items:center;gap:3px"><div style="width:8px;height:8px;border-radius:2px;background:#007aff"></div><span style="font-size:9px;color:#8e8e93">Moderate</span></div>
-          <div style="display:flex;align-items:center;gap:3px"><div style="width:8px;height:8px;border-radius:2px;background:#5856d6"></div><span style="font-size:9px;color:#8e8e93">Vigorous</span></div>
+
+    loadSection = `
+      <div style="margin-top:10px;padding-top:10px;border-top:1px solid #f2f2f7">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px">
+          <div class="ts-sparkline-label">7-day training load</div>
+          <div style="font-size:11px;font-weight:700;color:${overallColor}">${overallLabel}</div>
+        </div>
+        ${actBars}
+        <div style="display:flex;gap:10px;margin-top:5px">
+          <div style="display:flex;align-items:center;gap:3px"><div style="width:8px;height:8px;border-radius:2px;background:#007aff"></div><span style="font-size:9px;color:#8e8e93">Aerobic</span></div>
+          <div style="display:flex;align-items:center;gap:3px"><div style="width:8px;height:8px;border-radius:2px;background:#5856d6"></div><span style="font-size:9px;color:#8e8e93">Anaerobic</span></div>
+          <div style="margin-left:auto;font-size:9px;color:#c7c7cc">TE score / 5.0</div>
         </div>
       </div>`;
   }
 
+  // Garmin status badge
+  const statusColor = ts.status === 'Peaking' ? '#34c759'
+    : ts.status === 'Productive' ? '#007aff'
+    : ts.status === 'Maintaining' ? '#e6b800'
+    : ts.status === 'Recovery' ? '#8e8e93'
+    : ts.status === 'Overreaching' ? '#ff3b30' : '#8e8e93';
+
+  const loadBandColor = ts.loadBand === 'Optimal' ? '#34c759'
+    : ts.loadBand === 'High' ? '#ff9500'
+    : ts.loadBand === 'Low' ? '#8e8e93' : '#8e8e93';
+
+  const garminHeader = ts.status ? `
+    <div style="display:flex;gap:8px;margin-bottom:10px">
+      <div style="flex:1;background:#f9f9fb;border-radius:10px;padding:8px 10px;text-align:center">
+        <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#8e8e93;margin-bottom:3px">Status</div>
+        <div style="font-size:14px;font-weight:800;color:${statusColor}">${ts.status}</div>
+        <div style="font-size:9px;color:#c7c7cc">as of ${ts.statusDate}</div>
+      </div>
+      <div style="flex:1;background:#f9f9fb;border-radius:10px;padding:8px 10px;text-align:center">
+        <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#8e8e93;margin-bottom:3px">7-day Load</div>
+        <div style="font-size:14px;font-weight:800;color:#1d1d1f">${ts.load7day}</div>
+        <div style="font-size:9px;font-weight:600;color:${loadBandColor}">${ts.loadBand}</div>
+      </div>
+    </div>` : '';
+
   document.getElementById('training-status-panel').innerHTML = `
+    ${garminHeader}
     <div class="ts-vo2">
       <div class="ts-vo2-num">${ts.vo2max}</div>
       <div class="ts-vo2-label">VO₂ max</div>
@@ -413,7 +497,7 @@ function renderTrainingStatus() {
     </div>
     <div class="ts-sparkline-label">6-week trend</div>
     ${renderSparkline(ts.vo2maxHistory, 'v', vo2Color, null)}
-    ${loadChart}
+    ${loadSection}
   `;
 }
 
@@ -457,22 +541,80 @@ function renderActivities() {
 // ════════════════════════════════════════════════════════════
 // Running efficiency
 // ════════════════════════════════════════════════════════════
+function calcEI(distM, durSec, avgHR) {
+  if (!distM || distM < 200 || !avgHR) return null;
+  const paceM = (distM / durSec) * 60; // m/min
+  return paceM / avgHR;
+}
+
+function renderEISparkline(history) {
+  if (!history || history.length < 2) return '';
+  const vals = history.map(h => h.ei);
+  const minV = Math.min(...vals) - 0.05;
+  const maxV = Math.max(...vals) + 0.05;
+  const W = 260, H = 40;
+  const n = vals.length;
+
+  const pts = vals.map((v, i) => {
+    const x = (i / (n - 1)) * W;
+    const y = H - ((v - minV) / (maxV - minV)) * H;
+    return [x, y];
+  });
+  const polyline = pts.map(p => p.join(',')).join(' ');
+
+  // trend colour: improving = green
+  const trend = vals[vals.length - 1] - vals[0];
+  const lineColor = trend >= 0 ? '#34c759' : '#ff9500';
+
+  const dots = pts.map(([x, y], i) => {
+    const v = vals[i];
+    return `<circle cx="${x}" cy="${y}" r="${i === n - 1 ? 3.5 : 2.5}" fill="${lineColor}"/>
+            <title>${history[i].date}: EI ${v.toFixed(2)}</title>`;
+  }).join('');
+
+  // label the latest value
+  const [lx, ly] = pts[pts.length - 1];
+  const latest = vals[vals.length - 1];
+  const arrow = trend >= 0 ? '↑' : '↓';
+
+  const d0 = history[0].date.slice(5);
+  const d1 = history[history.length - 1].date.slice(5);
+
+  return `
+    <div style="margin-top:12px;padding-top:10px;border-top:1px solid #f2f2f7">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px">
+        <div class="sparkline-label">Efficiency Index <span style="color:#c7c7cc;font-weight:400;text-transform:none;letter-spacing:0">(pace m/min ÷ HR)</span></div>
+        <div style="font-size:14px;font-weight:800;color:${lineColor}">${arrow} ${latest.toFixed(2)}</div>
+      </div>
+      <svg viewBox="0 0 ${W + 4} ${H + 4}" style="width:100%;height:44px;overflow:visible">
+        <polyline points="${polyline}" fill="none" stroke="${lineColor}" stroke-width="2"
+          stroke-linejoin="round" stroke-linecap="round" opacity="0.85"/>
+        ${dots}
+      </svg>
+      <div style="display:flex;justify-content:space-between;font-size:9px;color:#c7c7cc;margin-top:2px">
+        <span>${d0}</span><span>${d1}</span>
+      </div>
+    </div>`;
+}
+
 function renderRunning() {
   const runs = DAILY.activities.filter(a => a.type === 'run' && a.distM > 500);
-
   let html = '';
 
   if (runs.length) {
     html += '<div class="run-top">';
-    runs.slice(0,3).forEach(r => {
-      const pk = paceMinKm(r.distM, r.durSec);
+    runs.slice(0, 3).forEach(r => {
+      const pk  = paceMinKm(r.distM, r.durSec);
+      const ei  = calcEI(r.distM, r.durSec, r.avgHR);
       html += `<div class="run-card">
         <div class="run-pace">${fmtPace(pk)}</div>
-        <div class="run-sub">@ ${r.avgHR} bpm avg</div>
-        <div class="run-sub">${(r.distM/1000).toFixed(1)} km · ${r.date}</div>
+        <div class="run-sub">@ ${r.avgHR} bpm</div>
+        <div class="run-sub">${(r.distM / 1000).toFixed(1)} km · ${r.date}</div>
+        ${ei != null ? `<div style="margin-top:4px;font-size:11px;font-weight:700;color:#007aff">EI ${ei.toFixed(2)}</div>` : ''}
       </div>`;
     });
     html += '</div>';
+
     if (runs.length >= 2) {
       const p0 = paceMinKm(runs[0].distM, runs[0].durSec);
       const p1 = paceMinKm(runs[1].distM, runs[1].durSec);
@@ -489,18 +631,97 @@ function renderRunning() {
   const prs = DAILY.prs;
   if (prs) {
     html += `<div class="run-prs">
-      <div class="pr-card">
-        <div class="pr-label">5 km PR</div>
-        <div class="pr-value">${prs.km5}</div>
-      </div>
-      <div class="pr-card">
-        <div class="pr-label">10 km PR</div>
-        <div class="pr-value">${prs.km10}</div>
-      </div>
+      <div class="pr-card"><div class="pr-label">5 km PR</div><div class="pr-value">${prs.km5}</div></div>
+      <div class="pr-card"><div class="pr-label">10 km PR</div><div class="pr-value">${prs.km10}</div></div>
     </div>`;
   }
 
+  // EI sparkline from accumulated run history
+  html += renderEISparkline(DAILY.runHistory || []);
+
   document.getElementById('running-panel').innerHTML = html;
+}
+
+// ════════════════════════════════════════════════════════════
+// Fitness Indicators panel
+// ════════════════════════════════════════════════════════════
+const FITNESS_TESTS = [
+  { key: 'pushups',    label: 'Push-ups',   unit: 'reps', icon: '💪', higherBetter: true  },
+  { key: 'snapJumps',  label: 'Snap Jumps', unit: '/60s', icon: '⚡', higherBetter: true  },
+  { key: 'plankSec',   label: 'Plank',      unit: 'sec',  icon: '🧱', higherBetter: true  },
+  { key: 'wallSitSec', label: 'Wall Sit',   unit: 'sec',  icon: '🦵', higherBetter: true  },
+];
+
+function ftSparkline(series) {
+  // series = array of { date, value }
+  if (series.length < 2) return '';
+  const vals = series.map(s => s.value);
+  const minV = Math.min(...vals);
+  const maxV = Math.max(...vals);
+  const range = maxV - minV || 1;
+  const W = 90, H = 24, n = series.length;
+  const pts = vals.map((v, i) => {
+    const x = (i / (n - 1)) * W;
+    const y = H - ((v - minV) / range) * H;
+    return `${x},${y}`;
+  }).join(' ');
+  const trend = vals[vals.length - 1] >= vals[vals.length - 2];
+  const col = trend ? '#34c759' : '#ff9500';
+  const [lx, ly] = pts.split(' ').pop().split(',');
+  return `<svg viewBox="0 0 ${W} ${H + 2}" style="width:100%;height:26px;display:block;overflow:visible">
+    <polyline points="${pts}" fill="none" stroke="${col}" stroke-width="1.8"
+      stroke-linejoin="round" stroke-linecap="round" opacity="0.85"/>
+    <circle cx="${lx}" cy="${ly}" r="2.5" fill="${col}"/>
+  </svg>`;
+}
+
+function renderFitness() {
+  const log = FITNESS_LOG;
+  if (!log.length) {
+    document.getElementById('fitness-panel').innerHTML =
+      '<div style="color:#c7c7cc;font-size:11px;text-align:center;padding:20px 0">No tests recorded yet.<br>Tell Claude your results to start tracking.</div>';
+    return;
+  }
+
+  let html = '<div class="ft-grid">';
+  FITNESS_TESTS.forEach(t => {
+    const entries = log
+      .filter(e => e[t.key] != null)
+      .sort((a, b) => a.date.localeCompare(b.date));
+
+    if (!entries.length) {
+      html += `<div class="ft-card">
+        <div class="ft-label">${t.icon} ${t.label}</div>
+        <div style="font-size:12px;color:#c7c7cc;margin-top:6px">Not tested</div>
+      </div>`;
+      return;
+    }
+
+    const latest   = entries[entries.length - 1];
+    const prev     = entries.length > 1 ? entries[entries.length - 2] : null;
+    const val      = latest[t.key];
+    const diff     = prev ? val - prev[t.key] : null;
+    const improved = diff !== null ? (t.higherBetter ? diff > 0 : diff < 0) : null;
+    const trendCol = improved === null ? '#8e8e93' : improved ? '#34c759' : '#ff9500';
+    const trendStr = diff === null ? '' : `${diff > 0 ? '+' : ''}${diff}`;
+
+    const series = entries.map(e => ({ date: e.date, value: e[t.key] }));
+    const spark  = ftSparkline(series);
+
+    html += `<div class="ft-card">
+      <div class="ft-label">${t.icon} ${t.label}</div>
+      <div style="display:flex;align-items:baseline;gap:3px">
+        <div class="ft-value">${val}</div>
+        <div class="ft-unit">${t.unit}</div>
+      </div>
+      ${diff !== null ? `<div class="ft-trend" style="color:${trendCol}">${trendStr}</div>` : ''}
+      <div class="ft-date">${latest.date}</div>
+      ${spark ? `<div class="ft-spark">${spark}</div>` : ''}
+    </div>`;
+  });
+
+  html += '</div>';
+  document.getElementById('fitness-panel').innerHTML = html;
 }
 
 // ════════════════════════════════════════════════════════════
@@ -636,6 +857,7 @@ renderRecovery();
 renderTrainingStatus();
 renderActivities();
 renderRunning();
+renderFitness();
 setupSlider();
 </script>
 </body>
