@@ -274,7 +274,15 @@ const DAILY = {
 // KARATE LOG — updated by Claude on each logged session
 // ════════════════════════════════════════════════════════════
 const KARATE_LOG = [
-  { date: "2026-06-27", skills: ["gekisai1"], notes: "1st Kata + bunkai (specific bunkai numbers not recorded)" },
+  {
+    date: "2026-06-27",
+    skills: ["gekisai1"],
+    confidence: {
+      "gekisai1": 4,          // 1st Kata: 4/5
+      "gekisai1_bunkai": 1    // 1st Kata Bunkais: 1/5
+    },
+    notes: "1st Kata + bunkai (specific bunkai numbers not recorded)"
+  },
 ];
 
 // ════════════════════════════════════════════════════════════
