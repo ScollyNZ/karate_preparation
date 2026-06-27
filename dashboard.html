@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Black Belt Preparation Dashboard</title>
+  <style>
+    :root { color-scheme: light; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f2f2f7; color: #1d1d1f; }
+
+    .header {
+      background: #1c1c1e; color: white;
+      padding: 16px 20px; display: flex; justify-content: space-between; align-items: center;
+    }
+    .header-title { font-size: 17px; font-weight: 700; }
+    .header-sub { font-size: 11px; color: #8e8e93; margin-top: 2px; }
+    .countdown .days { font-size: 30px; font-weight: 800; color: #ffd60a; text-align: right; line-height: 1; }
+    .countdown .label { font-size: 10px; color: #636366; text-transform: uppercase; letter-spacing: 0.06em; text-align: right; margin-top: 2px; }
+
+    .grid { display: grid; grid-template-columns: 1fr; gap: 12px; padding: 12px; }
+    .row-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    .card { background: white; border-radius: 14px; padding: 14px 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.07); }
+    .card-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: #8e8e93; margin-bottom: 10px; }
+
+    /* Recovery */
+    .recovery-body { display: flex; align-items: flex-start; gap: 16px; }
+    .rhr-left { flex-shrink: 0; }
+    .rhr-badge { width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 800; color: white; }
+    .rhr-num { font-size: 24px; font-weight: 800; line-height: 1; margin-top: 6px; }
+    .rhr-unit { font-size: 11px; color: #8e8e93; }
+    .rhr-status { font-size: 12px; font-weight: 700; margin-top: 2px; }
+    .rhr-avg { font-size: 10px; color: #8e8e93; margin-top: 4px; }
+    .sparkline-wrap { flex: 1; min-width: 0; }
+    .sparkline-label { font-size: 10px; color: #8e8e93; margin-bottom: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
+    .sparkline-svg { width: 100%; display: block; }
+    .sparkline-axis { display: flex; justify-content: space-between; font-size: 9px; color: #c7c7cc; margin-top: 2px; }
+
+    /* Training Status */
+    .ts-vo2 { text-align: center; margin-bottom: 10px; }
+    .ts-vo2-num { font-size: 32px; font-weight: 800; color: #007aff; line-height: 1; }
+    .ts-vo2-label { font-size: 10px; color: #8e8e93; margin-top: 2px; }
+    .ts-badge { display: inline-block; background: #e8f5e9; color: #2e7d32; font-size: 10px; font-weight: 700; border-radius: 6px; padding: 2px 7px; margin-top: 4px; }
+    .ts-change { font-size: 11px; color: #34c759; font-weight: 600; margin-top: 4px; }
+    .ts-sparkline-label { font-size: 10px; color: #8e8e93; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+
+    /* Activities */
+    .act-item { padding: 9px 0; border-bottom: 1px solid #f2f2f7; }
+    .act-item:last-child { border-bottom: none; }
+    .act-row { display: flex; align-items: center; gap: 10px; }
+    .act-icon { width: 34px; height: 34px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 17px; flex-shrink: 0; }
+    .act-info { flex: 1; min-width: 0; }
+    .act-name { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .act-meta { font-size: 11px; color: #8e8e93; margin-top: 1px; }
+    .act-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .act-cal { font-size: 11px; font-weight: 600; color: #ff9500; }
+    .act-hr { font-size: 12px; font-weight: 600; color: #ff3b30; }
+    .act-comment { font-size: 11px; color: #8e8e93; font-style: italic; margin-top: 4px; padding-left: 44px; }
+
+    /* Running */
+    .run-top { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+    .run-card { flex: 1; min-width: 100px; background: #f2f2f7; border-radius: 10px; padding: 10px 12px; text-align: center; }
+    .run-pace { font-size: 18px; font-weight: 800; }
+    .run-sub { font-size: 11px; color: #8e8e93; margin-top: 2px; }
+    .run-trend { font-size: 12px; color: #8e8e93; text-align: center; margin-bottom: 10px; }
+    .run-prs { display: flex; gap: 8px; }
+    .pr-card { flex: 1; background: #fff8e1; border-radius: 10px; padding: 8px 12px; text-align: center; border: 1px solid #ffe082; }
+    .pr-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: #f9a825; margin-bottom: 2px; }
+    .pr-value { font-size: 18px; font-weight: 800; color: #f57f17; }
+
+    /* Heatmap */
+    .heatmap-controls { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+    .heatmap-controls label { font-size: 11px; color: #8e8e93; white-space: nowrap; }
+    .heatmap-controls input[type=range] { flex: 1; accent-color: #007aff; }
+    .heatmap-date { font-size: 12px; font-weight: 700; min-width: 70px; text-align: right; }
+
+    .kata-section { margin-bottom: 10px; }
+    .kata-main { border-radius: 11px; padding: 10px 14px; cursor: pointer; transition: transform 0.1s, filter 0.1s; user-select: none; display: flex; justify-content: space-between; align-items: center; }
+    .kata-main:hover { transform: scaleX(1.01); filter: brightness(1.06); }
+    .kata-name { font-size: 13px; font-weight: 700; }
+    .kata-age { font-size: 11px; opacity: 0.85; }
+
+    .bunkai-row { display: flex; gap: 4px; margin-top: 4px; flex-wrap: wrap; }
+    .bunkai-chip { flex: 1; min-width: 34px; max-width: 60px; border-radius: 7px; padding: 5px 2px; text-align: center; cursor: pointer; transition: transform 0.1s; user-select: none; }
+    .bunkai-chip:hover { transform: scale(1.08); }
+    .bunkai-num { font-size: 12px; font-weight: 700; }
+    .bunkai-age { font-size: 9px; opacity: 0.8; margin-top: 2px; }
+
+    .renzoku-strip { margin-top: 4px; border-radius: 8px; padding: 7px 14px; cursor: pointer; transition: transform 0.1s; user-select: none; display: flex; justify-content: space-between; align-items: center; }
+    .renzoku-strip:hover { transform: scaleX(1.01); }
+    .renzoku-label { font-size: 11px; font-weight: 700; }
+    .renzoku-age { font-size: 10px; opacity: 0.85; }
+
+    .hm-divider { height: 1px; background: #f2f2f7; margin: 10px 0; }
+    .others-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .other-cell { border-radius: 11px; padding: 10px 8px; text-align: center; cursor: pointer; transition: transform 0.1s; user-select: none; }
+    .other-cell:hover { transform: scale(1.04); }
+    .other-name { font-size: 12px; font-weight: 700; }
+    .other-age { font-size: 10px; opacity: 0.85; margin-top: 3px; }
+
+    .hm-legend { display: flex; align-items: center; gap: 6px; margin-top: 14px; }
+    .hm-gradient { flex: 1; height: 8px; border-radius: 4px; background: linear-gradient(to right, rgb(28,28,30), rgb(180,36,36), rgb(255,45,45)); }
+    .hm-leg-label { font-size: 10px; color: #8e8e93; white-space: nowrap; }
+
+    .log-hint { margin-top: 14px; text-align: center; font-size: 11px; color: #c7c7cc; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="header-title">⬛ Black Belt Preparation</div>
+    <div class="header-sub">King's Birthday Weekend · June 2027</div>
+  </div>
+  <div class="countdown">
+    <div class="days" id="countdown-days">—</div>
+    <div class="label">Days to Grading</div>
+  </div>
+</div>
+
+<div class="grid">
+
+  <div class="row-2col">
+    <div class="card">
+      <div class="card-title">Recovery Status</div>
+      <div id="recovery-panel"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Training Status</div>
+      <div id="training-status-panel"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Recent Training (14 days)</div>
+    <div id="activities-panel"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Running Efficiency · Pace / HR</div>
+    <div id="running-panel"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Karate Technical Readiness</div>
+    <div class="heatmap-controls">
+      <label>Date:</label>
+      <input type="range" id="hm-slider" min="0" max="0" value="0">
+      <div class="heatmap-date" id="hm-date-label">Today</div>
+    </div>
+    <div id="hm-grid"></div>
+    <div class="hm-legend">
+      <span class="hm-leg-label">Fresh</span>
+      <div class="hm-gradient"></div>
+      <span class="hm-leg-label">21+ days</span>
+    </div>
+    <div class="log-hint">Tell Claude what you trained → logs to git automatically</div>
+  </div>
+
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════
+// DAILY DATA — updated each morning by scheduled task
+// ════════════════════════════════════════════════════════════
+const DAILY = {
+  fetchedDate: "2026-06-27",
+  rhr: 57,
+  rhrAvg7: 56,
+  prs: { km5: "26:00", km10: "1:03:48" },
+  rhrHistory: [
+    { date: "2026-06-21", rhr: 58 },
+    { date: "2026-06-22", rhr: 56 },
+    { date: "2026-06-23", rhr: 58 },
+    { date: "2026-06-24", rhr: 55 },
+    { date: "2026-06-25", rhr: 56 },
+    { date: "2026-06-26", rhr: 53 },
+    { date: "2026-06-27", rhr: 57 },
+  ],
+  trainingStatus: {
+    vo2max: 46,
+    vo2maxCategory: "Excellent",
+    vo2maxChange6w: 3,
+    vo2maxHistory: [
+      { date: "2026-05-17", v: 43 },
+      { date: "2026-05-21", v: 42 },
+      { date: "2026-05-24", v: 43 },
+      { date: "2026-05-26", v: 44 },
+      { date: "2026-06-06", v: 45 },
+      { date: "2026-06-11", v: 47 },
+      { date: "2026-06-14", v: 46 },
+      { date: "2026-06-27", v: 46 },
+    ],
+    weeklyLoad: [
+      { weekStart: "2026-05-25", moderate: 48,  vigorous: 69,  total: 117, partial: false },
+      { weekStart: "2026-06-01", moderate: 109, vigorous: 153, total: 262, partial: false },
+      { weekStart: "2026-06-08", moderate: 304, vigorous: 209, total: 513, partial: false },
+      { weekStart: "2026-06-15", moderate: 261, vigorous: 123, total: 384, partial: false },
+      { weekStart: "2026-06-22", moderate: 106, vigorous: 105, total: 211, partial: true  },
+    ],
+  },
+  activities: [
+    {
+      name: "Karate", type: "karate", date: "2026-06-26",
+      durSec: 6858, distM: 0, avgHR: 123, maxHR: 173, calories: 908,
+      comment: "Hard, varied session — 43% Z3-4 intensity with 27% Z1 recovery; max 173bpm and 20% Z4 time suggest sparring rounds."
+    },
+    {
+      name: "Karate", type: "karate", date: "2026-06-25",
+      durSec: 6142, distM: 0, avgHR: 119, maxHR: 175, calories: 691,
+      comment: "Technical, moderate load — 60% Z1-2 indicates kata/bunkai work with instruction time; single 175bpm burst, low recovery cost."
+    },
+    {
+      name: "Christchurch – Benchmark Run", type: "run", date: "2026-06-25",
+      durSec: 542, distM: 1516, avgHR: 142, maxHR: 154, calories: 113,
+      comment: "Structured benchmark — 5min effort at 5:01/km @ 148bpm avg; controlled tempo (62% Z3), well below max HR."
+    },
+    {
+      name: "Christchurch Running", type: "run", date: "2026-06-21",
+      durSec: 2631, distM: 7056, avgHR: 146, maxHR: 171, calories: 544,
+      comment: "Solid threshold run — pace locked 5:33–5:58/km while HR drifted only 8bpm (152→160); 73% Z4, strong aerobic efficiency."
+    },
+    {
+      name: "Cardio", type: "cardio", date: "2026-06-20",
+      durSec: 22619, distM: 0, avgHR: 106, maxHR: 163, calories: 1897,
+      comment: "Extended 6.3hr session (likely seminar) — predominantly aerobic (34% Z1); RHR recovered to normal within 48 hours."
+    },
+  ]
+};
+
+// ════════════════════════════════════════════════════════════
+// KARATE LOG — updated by Claude on each logged session
+// ════════════════════════════════════════════════════════════
+const KARATE_LOG = [
+];
+
+// ════════════════════════════════════════════════════════════
+// Skill structure
+// ════════════════════════════════════════════════════════════
+const KATA_GROUPS = [
+  { id: 'gekisai1',   name: 'Gekisai Dai Ichi', bunkai: 5,  renzoku: true  },
+  { id: 'gekisai2',   name: 'Gekisai Dai Ni',   bunkai: 2,  renzoku: true  },
+  { id: 'saifa',      name: 'Saifa',             bunkai: 6,  renzoku: true  },
+  { id: 'seiyunchin', name: 'Seiyunchin',        bunkai: 12, renzoku: true  },
+  { id: 'shisochin',  name: 'Shisochin',         bunkai: 0,  renzoku: false },
+];
+const OTHER_SKILLS = [
+  { id: 'sanchin',  name: 'Sanchin'       },
+  { id: 'sanchin2', name: 'Sanchin Dai Ni' },
+];
+function bunkaiId(g, n) { return `${g}_b${n}`; }
+function renzokuId(g)   { return `${g}_r`; }
+
+// ════════════════════════════════════════════════════════════
+// Helpers
+// ════════════════════════════════════════════════════════════
+const todayDate = new Date();
+todayDate.setHours(0,0,0,0);
+
+function toYMD(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function daysBetween(a, b) { return Math.round((new Date(b) - new Date(a)) / 86400000); }
+function fmtDur(sec) {
+  const h = Math.floor(sec/3600), m = Math.floor((sec%3600)/60);
+  return h > 0 ? `${h}h ${m}m` : `${m}m`;
+}
+function paceMinKm(distM, durSec) {
+  if (!distM || distM < 200) return null;
+  return (durSec/60) / (distM/1000);
+}
+function fmtPace(pk) {
+  if (!pk) return null;
+  const m = Math.floor(pk), s = Math.round((pk-m)*60);
+  return `${m}:${s.toString().padStart(2,'0')}/km`;
+}
+
+// ════════════════════════════════════════════════════════════
+// Countdown
+// ════════════════════════════════════════════════════════════
+const GRADING = new Date('2027-06-05');
+GRADING.setHours(0,0,0,0);
+document.getElementById('countdown-days').textContent = Math.ceil((GRADING - todayDate) / 86400000);
+
+// ════════════════════════════════════════════════════════════
+// Recovery panel + sparkline
+// ════════════════════════════════════════════════════════════
+function renderSparkline(hist, valKey, colorFn, labelFn) {
+  if (!hist || hist.length < 2) return '<div style="color:#c7c7cc;font-size:11px;padding:8px 0">Not enough data</div>';
+
+  const vals = hist.map(d => d[valKey]);
+  const minV = Math.min(...vals) - 2;
+  const maxV = Math.max(...vals) + 2;
+  const W = 220, H = 44;
+  const n = vals.length;
+
+  const pts = vals.map((v, i) => {
+    const x = (i / (n-1)) * W;
+    const y = H - ((v - minV) / (maxV - minV)) * H;
+    return [x, y];
+  });
+
+  const polyline = pts.map(p => p.join(',')).join(' ');
+  const latest = vals[vals.length-1];
+  const lineColor = colorFn ? colorFn(latest) : '#007aff';
+
+  const dots = pts.map(([x,y], i) => {
+    const v = vals[i];
+    const c = colorFn ? colorFn(v) : '#007aff';
+    return `<circle cx="${x}" cy="${y}" r="${i === n-1 ? 3.5 : 2}" fill="${c}" opacity="${i === n-1 ? 1 : 0.7}"/>`;
+  }).join('');
+
+  const d0 = hist[0].date.slice(5);
+  const d1 = hist[hist.length-1].date.slice(5);
+
+  const extraLabels = labelFn ? labelFn(minV, maxV, W, H) : '';
+
+  return `
+    <svg viewBox="0 0 ${W+28} ${H+2}" class="sparkline-svg" style="overflow:visible;height:48px">
+      <polyline points="${polyline}" fill="none" stroke="${lineColor}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+      ${dots}
+      ${extraLabels}
+    </svg>
+    <div class="sparkline-axis"><span>${d0}</span><span>${d1}</span></div>
+  `;
+}
+
+function rhrColor(v) { return v <= 55 ? '#34c759' : v <= 59 ? '#e6b800' : '#ff3b30'; }
+
+function rhrLabels(minV, maxV, W, H) {
+  return [[60,'#ff3b30'],[56,'#e6b800'],[52,'#34c759']].map(([v,c]) => {
+    const y = H - ((v - minV) / (maxV - minV)) * H;
+    if (y < 0 || y > H) return '';
+    return `<text x="${W+4}" y="${y+4}" font-size="8" fill="${c}" font-family="system-ui">${v}</text>`;
+  }).join('');
+}
+
+function renderRecovery() {
+  const rhr = DAILY.rhr;
+  const color = rhrColor(rhr);
+  const status = rhr <= 55 ? 'Fresh' : rhr <= 59 ? 'Normal Load' : 'Fatigued';
+
+  document.getElementById('recovery-panel').innerHTML = `
+    <div style="font-size:10px;color:#c7c7cc;text-align:right;margin-bottom:8px">as of ${DAILY.fetchedDate}</div>
+    <div class="recovery-body">
+      <div class="rhr-left">
+        <div class="rhr-badge" style="background:${color}">${rhr}</div>
+        <div class="rhr-num">${rhr} <span class="rhr-unit">bpm</span></div>
+        <div class="rhr-status" style="color:${color}">${status}</div>
+        <div class="rhr-avg">7-day avg: ${DAILY.rhrAvg7} bpm</div>
+      </div>
+      <div class="sparkline-wrap">
+        <div class="sparkline-label">RHR · Last ${DAILY.rhrHistory.length} days</div>
+        ${renderSparkline(DAILY.rhrHistory, 'rhr', rhrColor, rhrLabels)}
+      </div>
+    </div>
+  `;
+}
+
+// ════════════════════════════════════════════════════════════
+// Training Status panel
+// ════════════════════════════════════════════════════════════
+function renderTrainingStatus() {
+  const ts = DAILY.trainingStatus;
+  if (!ts) {
+    document.getElementById('training-status-panel').innerHTML =
+      '<div style="color:#c7c7cc;font-size:11px;text-align:center;padding:14px">No data</div>';
+    return;
+  }
+
+  const changeSign = ts.vo2maxChange6w >= 0 ? '+' : '';
+  const changeColor = ts.vo2maxChange6w >= 0 ? '#34c759' : '#ff3b30';
+  const vo2Color = () => '#007aff';
+
+  // Weekly load bar chart
+  let loadChart = '';
+  if (ts.weeklyLoad && ts.weeklyLoad.length) {
+    const maxTotal = Math.max(...ts.weeklyLoad.map(w => w.total));
+    const bars = ts.weeklyLoad.map(w => {
+      const pctMod = (w.moderate / maxTotal) * 100;
+      const pctVig = (w.vigorous / maxTotal) * 100;
+      const label = w.weekStart.slice(5); // MM-DD
+      const opacity = w.partial ? '0.55' : '1';
+      const tag = w.partial ? ' <span style="font-size:8px;color:#c7c7cc">partial</span>' : '';
+      return `
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+          <div style="font-size:9px;color:#8e8e93;width:26px;flex-shrink:0">${label}</div>
+          <div style="flex:1;display:flex;height:10px;border-radius:5px;overflow:hidden;background:#f2f2f7;opacity:${opacity}">
+            <div style="width:${pctMod}%;background:#007aff"></div>
+            <div style="width:${pctVig}%;background:#5856d6"></div>
+          </div>
+          <div style="font-size:9px;color:#8e8e93;width:28px;text-align:right;flex-shrink:0">${w.total}${tag}</div>
+        </div>`;
+    }).join('');
+    loadChart = `
+      <div style="margin-top:10px">
+        <div class="ts-sparkline-label">7-day training load <span style="color:#c7c7cc;font-weight:400;text-transform:none;letter-spacing:0">(intensity min)</span></div>
+        <div style="margin-top:6px">${bars}</div>
+        <div style="display:flex;gap:10px;margin-top:4px">
+          <div style="display:flex;align-items:center;gap:3px"><div style="width:8px;height:8px;border-radius:2px;background:#007aff"></div><span style="font-size:9px;color:#8e8e93">Moderate</span></div>
+          <div style="display:flex;align-items:center;gap:3px"><div style="width:8px;height:8px;border-radius:2px;background:#5856d6"></div><span style="font-size:9px;color:#8e8e93">Vigorous</span></div>
+        </div>
+      </div>`;
+  }
+
+  document.getElementById('training-status-panel').innerHTML = `
+    <div class="ts-vo2">
+      <div class="ts-vo2-num">${ts.vo2max}</div>
+      <div class="ts-vo2-label">VO₂ max</div>
+      <div><span class="ts-badge">${ts.vo2maxCategory}</span></div>
+      <div class="ts-change" style="color:${changeColor}">${changeSign}${ts.vo2maxChange6w} over 6 weeks</div>
+    </div>
+    <div class="ts-sparkline-label">6-week trend</div>
+    ${renderSparkline(ts.vo2maxHistory, 'v', vo2Color, null)}
+    ${loadChart}
+  `;
+}
+
+// ════════════════════════════════════════════════════════════
+// Activities panel — uses pre-generated embedded comments
+// ════════════════════════════════════════════════════════════
+function renderActivities() {
+  const acts = DAILY.activities;
+  if (!acts.length) {
+    document.getElementById('activities-panel').innerHTML =
+      '<div style="color:#c7c7cc;text-align:center;padding:14px">No activities recorded</div>';
+    return;
+  }
+  let html = '';
+  acts.forEach(a => {
+    const icon = a.type === 'karate' ? '🥋' : a.type === 'run' ? '🏃' : '💪';
+    const bg   = a.type === 'karate' ? '#ede7f6' : a.type === 'run' ? '#e8f5e9' : '#e3f2fd';
+    const extras = [];
+    if (a.distM > 200) extras.push(`${(a.distM/1000).toFixed(1)} km`);
+    const pk = paceMinKm(a.distM, a.durSec);
+    if (pk) extras.push(fmtPace(pk));
+    html += `
+      <div class="act-item">
+        <div class="act-row">
+          <div class="act-icon" style="background:${bg}">${icon}</div>
+          <div class="act-info">
+            <div class="act-name">${a.name}</div>
+            <div class="act-meta">${a.date} · ${fmtDur(a.durSec)}${extras.length ? ' · '+extras.join(' · ') : ''}</div>
+          </div>
+          <div class="act-right">
+            <span class="act-cal">${a.calories} kcal</span>
+            <span class="act-hr">♥ ${a.avgHR}<span style="color:#c7c7cc;font-weight:400">/${a.maxHR}</span></span>
+          </div>
+        </div>
+        ${a.comment ? `<div class="act-comment">${a.comment}</div>` : ''}
+      </div>`;
+  });
+  document.getElementById('activities-panel').innerHTML = html;
+}
+
+// ════════════════════════════════════════════════════════════
+// Running efficiency
+// ════════════════════════════════════════════════════════════
+function renderRunning() {
+  const runs = DAILY.activities.filter(a => a.type === 'run' && a.distM > 500);
+
+  let html = '';
+
+  if (runs.length) {
+    html += '<div class="run-top">';
+    runs.slice(0,3).forEach(r => {
+      const pk = paceMinKm(r.distM, r.durSec);
+      html += `<div class="run-card">
+        <div class="run-pace">${fmtPace(pk)}</div>
+        <div class="run-sub">@ ${r.avgHR} bpm avg</div>
+        <div class="run-sub">${(r.distM/1000).toFixed(1)} km · ${r.date}</div>
+      </div>`;
+    });
+    html += '</div>';
+    if (runs.length >= 2) {
+      const p0 = paceMinKm(runs[0].distM, runs[0].durSec);
+      const p1 = paceMinKm(runs[1].distM, runs[1].durSec);
+      const diff = Math.round((p1 - p0) * 60);
+      const trend = Math.abs(diff) < 5 ? '→ Pace consistent'
+        : diff > 0 ? `↑ ${diff}s/km faster than previous`
+        : `↓ ${-diff}s/km slower than previous`;
+      html += `<div class="run-trend"><strong>${trend}</strong></div>`;
+    }
+  } else {
+    html += '<div style="color:#c7c7cc;text-align:center;padding:10px 0;font-size:12px">No runs in last 14 days</div>';
+  }
+
+  const prs = DAILY.prs;
+  if (prs) {
+    html += `<div class="run-prs">
+      <div class="pr-card">
+        <div class="pr-label">5 km PR</div>
+        <div class="pr-value">${prs.km5}</div>
+      </div>
+      <div class="pr-card">
+        <div class="pr-label">10 km PR</div>
+        <div class="pr-value">${prs.km10}</div>
+      </div>
+    </div>`;
+  }
+
+  document.getElementById('running-panel').innerHTML = html;
+}
+
+// ════════════════════════════════════════════════════════════
+// Heatmap — linear 0→21 day colour scale (black → red)
+// Designed for red/green colour blindness
+// ════════════════════════════════════════════════════════════
+function cellStyle(daysSince) {
+  if (daysSince === null) return { bg: '#e5e5ea', fg: '#8e8e93' };
+  const t = Math.min(daysSince / 21, 1);
+  const r = Math.round(28  + t * (255 - 28));
+  const g = Math.round(28  + t * (45  - 28));
+  const b = Math.round(30  + t * (45  - 30));
+  return { bg: `rgb(${r},${g},${b})`, fg: '#fff' };
+}
+
+function buildFlatLog() {
+  const flat = [];
+  KARATE_LOG.forEach(e => (e.skills||[]).forEach(sid => flat.push({ date: e.date, skillId: sid })));
+  return flat.sort((a,b) => a.date.localeCompare(b.date));
+}
+
+function lastTrained(skillId, flatLog, asOfYMD) {
+  const hits = flatLog.filter(e => e.skillId === skillId && e.date <= asOfYMD);
+  return hits.length ? hits[hits.length-1].date : null;
+}
+
+function ageLabel(days) {
+  if (days === null) return 'Never';
+  if (days === 0)    return 'Today';
+  if (days === 1)    return 'Yesterday';
+  return `${days}d ago`;
+}
+
+function renderHeatmap(asOfYMD) {
+  const log = buildFlatLog();
+  const container = document.getElementById('hm-grid');
+  container.innerHTML = '';
+
+  KATA_GROUPS.forEach((g, gi) => {
+    const section = document.createElement('div');
+    section.className = 'kata-section';
+
+    const last = lastTrained(g.id, log, asOfYMD);
+    const days = last !== null ? daysBetween(last, asOfYMD) : null;
+    const { bg, fg } = cellStyle(days);
+    const mainCell = document.createElement('div');
+    mainCell.className = 'kata-main';
+    mainCell.style.background = bg; mainCell.style.color = fg;
+    mainCell.innerHTML = `<span class="kata-name">${g.name}</span><span class="kata-age">${ageLabel(days)}</span>`;
+    section.appendChild(mainCell);
+
+    if (g.bunkai > 0) {
+      const row = document.createElement('div');
+      row.className = 'bunkai-row';
+      for (let n = 1; n <= g.bunkai; n++) {
+        const sid = bunkaiId(g.id, n);
+        const bl = lastTrained(sid, log, asOfYMD);
+        const bd = bl !== null ? daysBetween(bl, asOfYMD) : null;
+        const { bg: bbg, fg: bfg } = cellStyle(bd);
+        const chip = document.createElement('div');
+        chip.className = 'bunkai-chip';
+        chip.style.background = bbg; chip.style.color = bfg;
+        chip.innerHTML = `<div class="bunkai-num">${n}</div><div class="bunkai-age">${ageLabel(bd)}</div>`;
+        row.appendChild(chip);
+      }
+      section.appendChild(row);
+    }
+
+    if (g.renzoku) {
+      const rid = renzokuId(g.id);
+      const rl = lastTrained(rid, log, asOfYMD);
+      const rd = rl !== null ? daysBetween(rl, asOfYMD) : null;
+      const { bg: rbg, fg: rfg } = cellStyle(rd);
+      const strip = document.createElement('div');
+      strip.className = 'renzoku-strip';
+      strip.style.background = rbg; strip.style.color = rfg;
+      strip.innerHTML = `<span class="renzoku-label">Renzoku</span><span class="renzoku-age">${ageLabel(rd)}</span>`;
+      section.appendChild(strip);
+    }
+
+    container.appendChild(section);
+    if (gi < KATA_GROUPS.length - 1) {
+      const div = document.createElement('div'); div.className = 'hm-divider';
+      container.appendChild(div);
+    }
+  });
+
+  const divider = document.createElement('div'); divider.className = 'hm-divider';
+  container.appendChild(divider);
+
+  const othersGrid = document.createElement('div');
+  othersGrid.className = 'others-grid';
+  OTHER_SKILLS.forEach(skill => {
+    const sl = lastTrained(skill.id, log, asOfYMD);
+    const sd = sl !== null ? daysBetween(sl, asOfYMD) : null;
+    const { bg, fg } = cellStyle(sd);
+    const cell = document.createElement('div');
+    cell.className = 'other-cell';
+    cell.style.background = bg; cell.style.color = fg;
+    cell.innerHTML = `<div class="other-name">${skill.name}</div><div class="other-age">${ageLabel(sd)}</div>`;
+    othersGrid.appendChild(cell);
+  });
+  container.appendChild(othersGrid);
+}
+
+// ════════════════════════════════════════════════════════════
+// Slider
+// ════════════════════════════════════════════════════════════
+function setupSlider() {
+  const slider = document.getElementById('hm-slider');
+  const label  = document.getElementById('hm-date-label');
+  const allDates = KARATE_LOG.map(e => e.date).concat([toYMD(todayDate)]);
+  const minYMD   = allDates.reduce((a,b) => a < b ? a : b);
+  const totalDays = Math.max(1, daysBetween(minYMD, toYMD(todayDate)));
+  slider.min = 0; slider.max = totalDays; slider.value = totalDays;
+
+  function refresh() {
+    const offset = parseInt(slider.value);
+    const d = new Date(minYMD); d.setDate(d.getDate() + offset);
+    const ymd = toYMD(d);
+    const isToday = ymd >= toYMD(todayDate);
+    label.textContent = isToday ? 'Today' : ymd;
+    renderHeatmap(isToday ? toYMD(todayDate) : ymd);
+  }
+  slider.addEventListener('input', refresh);
+  refresh();
+}
+
+// ════════════════════════════════════════════════════════════
+// Init
+// ════════════════════════════════════════════════════════════
+renderRecovery();
+renderTrainingStatus();
+renderActivities();
+renderRunning();
+setupSlider();
+</script>
+</body>
+</html>
