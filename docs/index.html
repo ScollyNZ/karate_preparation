@@ -183,137 +183,10 @@
 
 <script>
 // ════════════════════════════════════════════════════════════
-// DAILY DATA — updated each morning by scheduled task
+// Data — loaded from docs/data/*.json at runtime
+// Edit those files (not this HTML) to update dashboard data
 // ════════════════════════════════════════════════════════════
-const DAILY = {
-  fetchedDate: "2026-06-28",
-  rhr: 62,
-  rhrAvg7: 57,
-  prs: { km1: "5:29", km5: "26:00", km10: "1:00:04" },
-  runHistory: [
-    { date: "2026-06-14", name: "Christchurch – Pre-Race Workout", distM: 6923,  durSec: 2407, avgHR: 162, ei: 1.07 },
-    { date: "2026-06-21", name: "Christchurch Running",             distM: 7056,  durSec: 2631, avgHR: 146, ei: 1.10 },
-    { date: "2026-06-25", name: "Christchurch – Benchmark Run",     distM: 1516,  durSec: 542,  avgHR: 142, ei: 1.18 },
-    { date: "2026-06-28", name: "Christchurch Running",             distM: 10647, durSec: 4101, avgHR: 148, ei: 1.05 },
-  ],
-  rhrHistory: [
-    { date: "2026-06-21", rhr: 58 },
-    { date: "2026-06-22", rhr: 56 },
-    { date: "2026-06-23", rhr: 58 },
-    { date: "2026-06-24", rhr: 55 },
-    { date: "2026-06-25", rhr: 56 },
-    { date: "2026-06-26", rhr: 53 },
-    { date: "2026-06-27", rhr: 57 },
-    { date: "2026-06-28", rhr: 62 },
-  ],
-  trainingStatus: {
-    status: "Maintaining",
-    statusDate: "2026-06-25",
-    load7day: 322,
-    loadBand: "Optimal",
-    vo2max: 46,
-    vo2maxCategory: "Excellent",
-    vo2maxChange6w: 3,
-    vo2maxHistory: [
-      { date: "2026-05-17", v: 43 },
-      { date: "2026-05-21", v: 42 },
-      { date: "2026-05-24", v: 43 },
-      { date: "2026-05-26", v: 44 },
-      { date: "2026-06-06", v: 45 },
-      { date: "2026-06-11", v: 47 },
-      { date: "2026-06-14", v: 46 },
-      { date: "2026-06-28", v: 46 },
-    ],
-    weeklyLoad: [
-      { weekStart: "2026-05-25", moderate: 48,  vigorous: 69,  total: 117, partial: false },
-      { weekStart: "2026-06-01", moderate: 109, vigorous: 153, total: 262, partial: false },
-      { weekStart: "2026-06-08", moderate: 304, vigorous: 209, total: 513, partial: false },
-      { weekStart: "2026-06-15", moderate: 261, vigorous: 123, total: 384, partial: false },
-      { weekStart: "2026-06-22", moderate: 106, vigorous: 105, total: 211, partial: false },
-    ],
-  },
-  activities: [
-    {
-      name: "Christchurch Running", type: "run", date: "2026-06-28",
-      durSec: 4101, distM: 10647, avgHR: 148, maxHR: 171, calories: 851,
-      aerobicTE: null, anaerobicTE: null,
-      comment: "Longest run of the block — 10.6km at 6:26/km, avgHR 148; solid aerobic stimulus on a day RHR hit 62bpm, showing fitness is carrying despite accumulated load."
-    },
-    {
-      name: "Karate", type: "karate", date: "2026-06-26",
-      durSec: 6858, distM: 0, avgHR: 123, maxHR: 173, calories: 908,
-      aerobicTE: 3.1, anaerobicTE: 2.0,
-      comment: "Hard, varied session — 43% Z3-4 intensity with 27% Z1 recovery; max 173bpm and 20% Z4 time suggest sparring rounds."
-    },
-    {
-      name: "Karate", type: "karate", date: "2026-06-25",
-      durSec: 6142, distM: 0, avgHR: 119, maxHR: 175, calories: 691,
-      aerobicTE: 2.8, anaerobicTE: 1.7,
-      comment: "Technical, moderate load — 60% Z1-2 indicates kata/bunkai work with instruction time; single 175bpm burst, low recovery cost."
-    },
-    {
-      name: "Christchurch – Benchmark Run", type: "run", date: "2026-06-25",
-      durSec: 542, distM: 1516, avgHR: 142, maxHR: 154, calories: 113,
-      aerobicTE: 2.1, anaerobicTE: 0.0,
-      comment: "Structured benchmark — 5min effort at 5:01/km @ 148bpm avg; controlled tempo (62% Z3), well below max HR."
-    },
-    {
-      name: "Christchurch Running", type: "run", date: "2026-06-21",
-      durSec: 2631, distM: 7056, avgHR: 146, maxHR: 171, calories: 544,
-      aerobicTE: 3.7, anaerobicTE: 0.0,
-      comment: "Solid threshold run — pace locked 5:33–5:58/km while HR drifted only 8bpm (152→160); 73% Z4, strong aerobic efficiency."
-    },
-    {
-      name: "Cardio", type: "karate", date: "2026-06-20",
-      durSec: 22619, distM: 0, avgHR: 106, maxHR: 163, calories: 1897,
-      aerobicTE: 2.6, anaerobicTE: 1.5,
-      comment: "Extended 6.3hr session (likely seminar) — predominantly aerobic (34% Z1); RHR recovered to normal within 48 hours."
-    },
-    {
-      name: "Cardio", type: "karate", date: "2026-06-16",
-      durSec: 9156, distM: 0, avgHR: 108, maxHR: 172, calories: 577,
-      aerobicTE: 1.6, anaerobicTE: 2.1,
-      comment: "2.5hr moderate session — low avg HR (108bpm) with 172bpm spikes; anaerobic TE 2.1 suggests intermittent karate-style bursts within an otherwise easy load."
-    },
-    {
-      name: "Christchurch – Pre-Race Workout", type: "run", date: "2026-06-14",
-      durSec: 2407, distM: 6923, avgHR: 162, maxHR: 183, calories: 580,
-      aerobicTE: 4.8, anaerobicTE: 0.0,
-      comment: "Race-intensity effort — 5:47/km @ 162bpm avg, 183bpm peak; aerobic TE 4.8 (Highly Improving) signals a near-maximal stimulus. Strongest aerobic session in the window."
-    },
-  ],
-  weightHistory: [
-    { date: "2026-06-07", kg: 84.4 },
-    { date: "2026-06-08", kg: 84.0 },
-    { date: "2026-06-10", kg: 84.6 },
-    { date: "2026-06-11", kg: 85.2 },
-    { date: "2026-06-14", kg: 84.7 },
-    { date: "2026-06-19", kg: 84.5 },
-  ]
-};
-
-// ════════════════════════════════════════════════════════════
-// KARATE LOG — updated by Claude on each logged session
-// ════════════════════════════════════════════════════════════
-const KARATE_LOG = [
-  {
-    date: "2026-06-27",
-    skills: ["gekisai1", "gekisai1_b1", "gekisai1_b2", "gekisai1_b3", "gekisai1_b4", "gekisai1_b5"],
-    confidence: {
-      "gekisai1": 4,          // 1st Kata: 4/5
-      "gekisai1_bunkai": 1    // 1st Kata Bunkais: 1/5
-    },
-    notes: "1st Kata + all 5 bunkais (individual bunkai scores not recorded)"
-  },
-];
-
-// ════════════════════════════════════════════════════════════
-// FITNESS LOG — updated by Claude when test results reported
-// Fields: date, pushups, snapJumps (60s max), plankSec, wallSitSec
-// ════════════════════════════════════════════════════════════
-const FITNESS_LOG = [
-  { date: "2026-06-27", pushups: 10 },
-];
+let DAILY, KARATE_LOG, FITNESS_LOG;
 
 // ════════════════════════════════════════════════════════════
 // Skill structure
@@ -1016,15 +889,36 @@ function setupSlider() {
 }
 
 // ════════════════════════════════════════════════════════════
-// Init
+// Init — fetch data files then render
 // ════════════════════════════════════════════════════════════
-renderRecovery();
-renderTrainingStatus();
-renderBodyWeight();
-renderActivities();
-renderRunning();
-renderFitness();
-setupSlider();
+function initDashboard() {
+  renderRecovery();
+  renderTrainingStatus();
+  renderBodyWeight();
+  renderActivities();
+  renderRunning();
+  renderFitness();
+  setupSlider();
+}
+
+Promise.all([
+  fetch('data/daily.json').then(r => { if (!r.ok) throw new Error('daily.json ' + r.status); return r.json(); }),
+  fetch('data/karate_log.json').then(r => { if (!r.ok) throw new Error('karate_log.json ' + r.status); return r.json(); }),
+  fetch('data/fitness_log.json').then(r => { if (!r.ok) throw new Error('fitness_log.json ' + r.status); return r.json(); }),
+]).then(([daily, karateLog, fitnessLog]) => {
+  DAILY = daily;
+  KARATE_LOG = karateLog;
+  FITNESS_LOG = fitnessLog;
+  initDashboard();
+}).catch(err => {
+  console.error('Dashboard data load failed:', err);
+  document.querySelector('.grid').insertAdjacentHTML('afterbegin',
+    `<div style="background:#fff3cd;border:1px solid #ffc107;border-radius:10px;padding:14px;color:#856404;font-size:13px">
+      ⚠️ Could not load dashboard data — ${err.message}.<br>
+      Open via GitHub Pages or a local server (not file://).
+    </div>`
+  );
+});
 </script>
 </body>
 </html>
