@@ -189,7 +189,7 @@ const DAILY = {
   fetchedDate: "2026-06-28",
   rhr: 62,
   rhrAvg7: 57,
-  prs: { km5: "26:00", km10: "1:03:48" },
+  prs: { km1: "5:29", km5: "26:00", km10: "1:00:04" },
   runHistory: [
     { date: "2026-06-14", name: "Christchurch – Pre-Race Workout", distM: 6923,  durSec: 2407, avgHR: 162, ei: 1.07 },
     { date: "2026-06-21", name: "Christchurch Running",             distM: 7056,  durSec: 2631, avgHR: 146, ei: 1.10 },
@@ -731,8 +731,9 @@ function renderRunning() {
   const prs = DAILY.prs;
   if (prs) {
     html += `<div class="run-prs">
-      <div class="pr-card"><div class="pr-label">5 km PR</div><div class="pr-value">${prs.km5}</div></div>
-      <div class="pr-card"><div class="pr-label">10 km PR</div><div class="pr-value">${prs.km10}</div></div>
+      ${prs.km1  ? `<div class="pr-card"><div class="pr-label">1 km PR</div><div class="pr-value">${prs.km1}</div></div>` : ''}
+      ${prs.km5  ? `<div class="pr-card"><div class="pr-label">5 km PR</div><div class="pr-value">${prs.km5}</div></div>` : ''}
+      ${prs.km10 ? `<div class="pr-card"><div class="pr-label">10 km PR</div><div class="pr-value">${prs.km10}</div></div>` : ''}
     </div>`;
   }
 

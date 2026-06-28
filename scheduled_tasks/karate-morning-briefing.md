@@ -30,6 +30,7 @@ Use the Garmin MCP tools to fetch ALL of the following. Today's date is provided
 - `mcp__Garmin_Connect__get_training_load_trend` for the past 7 days
 - `mcp__Garmin_Connect__get_activities_by_date` for yesterday (to capture any training sessions)
 - `mcp__Garmin_Connect__get_body_battery` for today
+- `mcp__Garmin_Connect__get_personal_record` (no args) — check for new PRs and update `prs` in DAILY if any have changed
 
 Parse the returned data. Extract:
 - Latest HRV (ms) and 7-day HRV trend (rising/falling/stable)
