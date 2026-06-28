@@ -186,14 +186,15 @@
 // DAILY DATA — updated each morning by scheduled task
 // ════════════════════════════════════════════════════════════
 const DAILY = {
-  fetchedDate: "2026-06-27",
-  rhr: 57,
-  rhrAvg7: 56,
+  fetchedDate: "2026-06-28",
+  rhr: 62,
+  rhrAvg7: 57,
   prs: { km5: "26:00", km10: "1:03:48" },
   runHistory: [
-    { date: "2026-06-14", name: "Christchurch – Pre-Race Workout", distM: 6923, durSec: 2407, avgHR: 162, ei: 1.07 },
-    { date: "2026-06-21", name: "Christchurch Running",             distM: 7056, durSec: 2631, avgHR: 146, ei: 1.10 },
-    { date: "2026-06-25", name: "Christchurch – Benchmark Run",     distM: 1516, durSec: 542,  avgHR: 142, ei: 1.18 },
+    { date: "2026-06-14", name: "Christchurch – Pre-Race Workout", distM: 6923,  durSec: 2407, avgHR: 162, ei: 1.07 },
+    { date: "2026-06-21", name: "Christchurch Running",             distM: 7056,  durSec: 2631, avgHR: 146, ei: 1.10 },
+    { date: "2026-06-25", name: "Christchurch – Benchmark Run",     distM: 1516,  durSec: 542,  avgHR: 142, ei: 1.18 },
+    { date: "2026-06-28", name: "Christchurch Running",             distM: 10647, durSec: 4101, avgHR: 148, ei: 1.05 },
   ],
   rhrHistory: [
     { date: "2026-06-21", rhr: 58 },
@@ -203,6 +204,7 @@ const DAILY = {
     { date: "2026-06-25", rhr: 56 },
     { date: "2026-06-26", rhr: 53 },
     { date: "2026-06-27", rhr: 57 },
+    { date: "2026-06-28", rhr: 62 },
   ],
   trainingStatus: {
     status: "Maintaining",
@@ -220,17 +222,23 @@ const DAILY = {
       { date: "2026-06-06", v: 45 },
       { date: "2026-06-11", v: 47 },
       { date: "2026-06-14", v: 46 },
-      { date: "2026-06-27", v: 46 },
+      { date: "2026-06-28", v: 46 },
     ],
     weeklyLoad: [
       { weekStart: "2026-05-25", moderate: 48,  vigorous: 69,  total: 117, partial: false },
       { weekStart: "2026-06-01", moderate: 109, vigorous: 153, total: 262, partial: false },
       { weekStart: "2026-06-08", moderate: 304, vigorous: 209, total: 513, partial: false },
       { weekStart: "2026-06-15", moderate: 261, vigorous: 123, total: 384, partial: false },
-      { weekStart: "2026-06-22", moderate: 106, vigorous: 105, total: 211, partial: true  },
+      { weekStart: "2026-06-22", moderate: 106, vigorous: 105, total: 211, partial: false },
     ],
   },
   activities: [
+    {
+      name: "Christchurch Running", type: "run", date: "2026-06-28",
+      durSec: 4101, distM: 10647, avgHR: 148, maxHR: 171, calories: 851,
+      aerobicTE: null, anaerobicTE: null,
+      comment: "Longest run of the block — 10.6km at 6:26/km, avgHR 148; solid aerobic stimulus on a day RHR hit 62bpm, showing fitness is carrying despite accumulated load."
+    },
     {
       name: "Karate", type: "karate", date: "2026-06-26",
       durSec: 6858, distM: 0, avgHR: 123, maxHR: 173, calories: 908,
